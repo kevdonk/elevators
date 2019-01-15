@@ -9,21 +9,35 @@ class Building {
   // call(floor, isGoingUp) - when someone presses the up/down arrow, and we need to find them an elevator
   // isGoingUp === true: up arrow pressed; isGoingUp === false: down arrow
   call(floor, isGoingUp) {
-    this.elevators.forEach((elevator) => {
-      console.log('elevator on floor: ', elevator.currentFloor);
-    })
+    let closestAvailable = null;
+    for (let i = 0; i < this.elevators.length; i++) {
+      console.log('elevator #', i, 'on floor: ', this.elevators[i].currentFloor);
+      if (this.elevators[i].isOccupied === false && this.elevators[i].currentFloor == floor) {
+        closestAvailable = i;
+      }
+    }
+    this.elevators[closestAvailable].addStop(floor);
   }
 }
 
 class Elevator {
   constructor(numFloors) {
-    // can likely just inherit
+    // can likely just inherit this
     this.numFloors = numFloors;
     this.trips = 0;
     this.maintenanceMode = false;
-    this.occupied = false;
+    // we assume that when an elevator has stops to make, it is occupied
+    // even if it is on the way to pick someone up, or someone hit additional buttons and got off
+    this.isOccupied = false;
+    this.stopsRemaining = [];
     // 1 is ground floor
     this.currentFloor = 1;
+  }
+  // addStop(floor) - adds the floor to this elevators list of stops to make
+  addStop(floor) {
+    // should sort these to ensure shortest path, in the event multiple people get on an elevator and press buttons in
+    // an order that would be sub-optimal
+    this.stopsRemaining.push(floor)
   }
   // 2. Each elevator will report as is moves from floor to floor.
   move() {
@@ -55,7 +69,7 @@ class Elevator {
 
 }
 
-var building = new Building(1,10)
-building.call(2, true)
+var building = new Building(10,10)
+building.call(1, true)
 
 console.log('building: ', building);
