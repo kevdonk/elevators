@@ -12,7 +12,12 @@ class Building {
     let closestAvailable = null;
     for (let i = 0; i < this.elevators.length; i++) {
       console.log('elevator #', i, 'on floor: ', this.elevators[i].currentFloor);
-      if (this.elevators[i].isOccupied === false && this.elevators[i].currentFloor == floor) {
+      // find the closest elevator
+
+      // check if there is an elevator already on the way
+
+      // highest priority - empty elevator already on this floor
+      if (this.elevators[i].isOccupied() === false && this.elevators[i].currentFloor == floor) {
         closestAvailable = i;
       }
     }
@@ -26,14 +31,11 @@ class Elevator {
     this.numFloors = numFloors;
     this.trips = 0;
     this.maintenanceMode = false;
-    // we assume that when an elevator has stops to make, it is occupied
-    // even if it is on the way to pick someone up, or someone hit additional buttons and got off
-    this.isOccupied = false;
     this.stopsRemaining = [];
     // 1 is ground floor
     this.currentFloor = 1;
   }
-  // addStop(floor) - adds the floor to this elevators list of stops to make
+  // addStop(floor) - appends the floor to this elevators array of stops to make
   addStop(floor) {
     // should sort these to ensure shortest path, in the event multiple people get on an elevator and press buttons in
     // an order that would be sub-optimal
@@ -46,6 +48,33 @@ class Elevator {
   // 3. Each elevator will report when it opens or closes its doors.
   toggleDoors() {
 
+  }
+
+  // we assume that when an elevator has stops to make, it is occupied
+  // even if it is on the way to pick someone up, or someone hit additional buttons and got off
+  isOccupied() {
+    if (this.stopsRemaining[0] != null) {
+      return true;
+    }
+    return false;
+  }
+  // isOnTheWayTo(floor, isGoingUp) - returns true if this elevator will reach the given floor on its current path
+  isOnTheWayTo(floor, isGoingUp) {
+    // assume stopsRemaining are in a reasonable order, and the first in the list is the next stop
+
+    //elevator isn't moving
+    if !this.isOccupied() {
+      return false;
+    }
+    // elevator is going up, and will reach given floor
+    if ((this.currentFloor <= floor <= this.stopsRemaining[0]) && isGoingUp) {
+      return true;
+    }
+    // elevator is going down, and will reach given floor
+    else if ((this.stopsRemaining[0] <= floor <= this.currentFloor) && !isGoingUp) {
+      return true;
+    }
+    return false;
   }
 
 // 4. An elevator cannot proceed above the top floor.
